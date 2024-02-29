@@ -1,5 +1,4 @@
 import datetime
-import re
 from collections import Counter
 from email.utils import parseaddr
 

@@ -1,14 +1,12 @@
 import datetime
-import random
 from typing import List
 
 import pytz
-from pytz import UTC
 
 from stregreport.views import fjule_party
 
 from django.core import management
-from django.forms import modelformset_factory, formset_factory
+from django.forms import modelformset_factory
 
 from django.contrib.admin.views.decorators import staff_member_required
 from stregsystem.templatetags.stregsystem_extras import money
@@ -20,7 +18,6 @@ from django.http import HttpResponsePermanentRedirect, HttpResponseBadRequest, J
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from django_select2 import forms as s2forms
 import urllib.parse
 
 from stregsystem import parser
@@ -53,10 +50,6 @@ from .forms import MobilePayToolForm, QRPaymentForm, PurchaseForm, RankingDateFo
 
 import json
 
-from .purchase_heatmap import (
-    prepare_heatmap_template_context,
-)
-
 
 def __get_news():
     try:
@@ -72,10 +65,6 @@ def __get_productlist(room_id):
 
 def roomindex(request):
     return HttpResponsePermanentRedirect('/1/')
-
-
-#    room_list = Room.objects.all().order_by('name', 'description')
-#    return render(request, 'stregsystem/roomindex.html', {'room_list': room_list})
 
 
 def index(request, room_id):
@@ -214,12 +203,10 @@ def usermenu(request, room, member, bought, from_sale=False):
     give_multibuy_hint, sale_hints = _multibuy_hint(timezone.now(), member)
     give_multibuy_hint = give_multibuy_hint and from_sale
 
-    heatmap_context = prepare_heatmap_template_context(member, 12, datetime.date.today())
-
     if member.has_stregforbud():
         return render(request, 'stregsystem/error_stregforbud.html', locals())
     else:
-        return render(request, 'stregsystem/menu.html', {**locals(), **heatmap_context})
+        return render(request, 'stregsystem/menu.html', locals())
 
 
 def menu_userinfo(request, room_id, member_id):

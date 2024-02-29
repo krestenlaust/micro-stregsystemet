@@ -40,7 +40,6 @@ from stregsystem.models import (
     MobilePayment,
     NamedProduct,
 )
-from stregsystem.purchase_heatmap import prepare_heatmap_template_context
 from stregsystem.templatetags.stregsystem_extras import caffeine_emoji_render
 from stregsystem.utils import mobile_payment_exact_match_member, strip_emoji, MobilePaytoolException
 
