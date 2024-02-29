@@ -1,8 +1,8 @@
-from django.contrib import admin
 from django import forms
-from django.contrib.admin.views.autocomplete import AutocompleteJsonView
+from django.contrib import admin
 from django.contrib import messages
 from django.contrib.admin.models import LogEntry
+from django.contrib.admin.views.autocomplete import AutocompleteJsonView
 
 from stregsystem.models import (
     Category,

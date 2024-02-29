@@ -1,5 +1,4 @@
 from django import template
-from django.utils import timezone
 
 from stregsystem.caffeine import caffeine_mg_to_coffee_cups
 

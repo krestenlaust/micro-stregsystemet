@@ -1,25 +1,22 @@
 import datetime
+import json
+import urllib.parse
 from typing import List
 
 import pytz
-
-from stregreport.views import fjule_party
-
-from django.core import management
-from django.forms import modelformset_factory
-
-from django.contrib.admin.views.decorators import staff_member_required
-from stregsystem.templatetags.stregsystem_extras import money
-from django.contrib.auth.decorators import permission_required
-from django.conf import settings
-from django.db.models import Q, Count, Sum
 from django import forms
+from django.conf import settings
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import permission_required
+from django.core import management
+from django.db.models import Q, Count, Sum
+from django.forms import modelformset_factory
 from django.http import HttpResponsePermanentRedirect, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-import urllib.parse
 
+from stregreport.views import fjule_party
 from stregsystem import parser
 from stregsystem.models import (
     Member,
@@ -35,6 +32,7 @@ from stregsystem.models import (
     Category,
     NamedProduct,
 )
+from stregsystem.templatetags.stregsystem_extras import money
 from stregsystem.utils import (
     make_active_productlist_query,
     qr_code,
@@ -43,12 +41,9 @@ from stregsystem.utils import (
     parse_csv_and_create_mobile_payments,
     MobilePaytoolException,
 )
-
 from .booze import ballmer_peak
 from .caffeine import caffeine_mg_to_coffee_cups
 from .forms import MobilePayToolForm, QRPaymentForm, PurchaseForm, RankingDateForm
-
-import json
 
 
 def __get_news():
@@ -555,9 +550,9 @@ def get_user_info(request):
     return JsonResponse(
         {
             'balance': member.balance,
-            'username': member.username,
+            'phone_number': member.phone_number,
             'active': member.active,
-            'name': f'{member.firstname} {member.lastname}',
+            'name': member.full_name,
         }
     )
 
@@ -593,7 +588,7 @@ def api_sale(request):
             return HttpResponseBadRequest("Missing or invalid member_id")
 
         try:
-            username, bought_ids = parser.parse(_pre_process(buy_string))
+            phone_number, bought_ids = parser.parse(_pre_process(buy_string))
         except parser.ParseError as e:
             return HttpResponseBadRequest("Parse error: {}".format(e))
 
@@ -601,11 +596,11 @@ def api_sale(request):
         if member is None:
             return HttpResponseBadRequest("Invalid member_id")
 
-        if username != member.username:
-            return HttpResponseBadRequest("Username does not match member_id")
+        if phone_number != member.phone_number:
+            return HttpResponseBadRequest("Phone_number does not match member_id")
 
-        if not buy_string.startswith(member.username):
-            buy_string = f'{member.username} {buy_string}'
+        if not buy_string.startswith(member.phone_number):
+            buy_string = f'{member.phone_number} {buy_string}'
 
         try:
             room = Room.objects.get(pk=room)

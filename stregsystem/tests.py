@@ -5,16 +5,17 @@ from copy import deepcopy
 from unittest.mock import patch
 
 import pytz
-from django.utils.dateparse import parse_datetime
-import stregsystem.parser as parser
-from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
+from django.core.exceptions import ValidationError
 from django.forms import model_to_dict
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 from freezegun import freeze_time
+
+import stregsystem.parser as parser
 from stregreport import views
 from stregsystem import admin
 from stregsystem import views as stregsystem_views

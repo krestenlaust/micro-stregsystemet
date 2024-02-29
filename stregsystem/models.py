@@ -4,14 +4,15 @@ from email.utils import parseaddr
 
 from django.contrib.admin.models import LogEntry, ADDITION, CHANGE
 from django.contrib.auth.models import User
-from django.core.validators import RegexValidator
 from django.contrib.contenttypes.models import ContentType
+from django.core.validators import RegexValidator
 from django.db import models, transaction
 from django.db.models import Count
 from django.utils import timezone
 
 from stregsystem.caffeine import Intake, CAFFEINE_TIME_INTERVAL, current_caffeine_in_body_compound_interest
 from stregsystem.deprecated import deprecated
+from stregsystem.mail import send_payment_mail
 from stregsystem.templatetags.stregsystem_extras import money
 from stregsystem.utils import (
     date_to_midnight,
@@ -19,7 +20,6 @@ from stregsystem.utils import (
     make_unprocessed_member_filled_mobilepayment_query,
     MobilePaytoolException,
 )
-from stregsystem.mail import send_payment_mail
 
 
 def price_display(value):
