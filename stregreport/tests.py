@@ -1,9 +1,6 @@
-import datetime
-
 from django.test import TestCase
 from django.urls import reverse
 from stregreport import views
-from freezegun import freeze_time
 
 
 class ParseIdStringTests(TestCase):

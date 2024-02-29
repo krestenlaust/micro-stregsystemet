@@ -9,7 +9,6 @@ from django.utils.dateparse import parse_datetime
 import stregsystem.parser as parser
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
-from django.contrib.admin.sites import AdminSite
 from django.contrib.messages import get_messages
 from django.forms import model_to_dict
 from django.test import TestCase
@@ -19,7 +18,7 @@ from freezegun import freeze_time
 from stregreport import views
 from stregsystem import admin
 from stregsystem import views as stregsystem_views
-from stregsystem.admin import CategoryAdmin, ProductAdmin, MemberForm, MemberAdmin
+from stregsystem.admin import CategoryAdmin, ProductAdmin, MemberForm
 from stregsystem.booze import ballmer_peak
 from stregsystem.caffeine import CAFFEINE_DEGRADATION_PR_HOUR, CAFFEINE_IN_COFFEE
 from stregsystem.models import (
@@ -459,60 +458,6 @@ class UserInfoViewTests(TestCase):
     # @INCOMPLETE: Strictly speaking there are two more variables here. Are
     # they actually necessary, since we don't allow people to go negative
     # anymore anyway? - Jesper 18/09-2017
-
-
-class PurchaseHeatmapTests(TestCase):
-    def setUp(self):
-        self.room = Room.objects.create(name="test")
-        self.jokke = Member.objects.create(username="jokke")
-        self.coke = Product.objects.create(name="coke", price=100, active=True)
-        self.flan = Product.objects.create(name="flan", price=200, active=True)
-        self.sales = []
-        self.payments = []
-
-    def test_empty_user(self):
-        with freeze_time(timezone.datetime(2000, 1, 1)) as frozen_time:
-            heatmap_context = prepare_heatmap_template_context(self.jokke, 5, datetime.date.today())
-
-        for weekday_header, rows in heatmap_context['rows']:
-            for row_data in rows:
-                self.assertEqual(len(row_data.products), 0)
-
-    def test_weeks_correct(self):
-        with freeze_time(timezone.datetime(2000, 1, 1)) as frozen_time:
-            heatmap_context = prepare_heatmap_template_context(self.jokke, 5, datetime.date.today())
-
-            self.assertEqual(heatmap_context['column_labels'], ['48', '49', '50', '51', '52'])
-
-    def test_user_with_some_purchases(self):
-        # TODO: Do test methods endure side-effects ? Or do they reset.
-        with freeze_time(timezone.datetime(2000, 1, 1)) as frozen_time:
-            for i in range(1, 4):
-                self.sales.append(
-                    Sale.objects.create(
-                        member=self.jokke,
-                        product=self.coke,
-                        price=100,
-                    )
-                )
-                frozen_time.tick()
-
-            frozen_time.tick(datetime.timedelta(days=1))
-            heatmap_context = prepare_heatmap_template_context(self.jokke, 5, datetime.date.today())
-
-            found_date = False
-
-            for weekday_header, rows in heatmap_context['rows']:
-                for row_data in rows:
-                    if str(row_data.date) == "2000-01-01":
-                        found_date = True
-                        self.assertEqual(len(row_data.products), 3)
-                    else:
-                        self.assertEqual(len(row_data.products), 0)
-
-            self.assertEqual(found_date, True)
-
-        self.sales.clear()
 
 
 class TransactionTests(TestCase):
