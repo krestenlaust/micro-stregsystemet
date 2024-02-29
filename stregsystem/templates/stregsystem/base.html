@@ -13,11 +13,6 @@
     </script>
 </head>
 <body onLoad='if (document.focusform) {document.focusform.quickbuy.focus()}'>
-{% comment %}
-<pre>{% filter escape %}{% debug %}{% endfilter %}</pre>
-
-{% endcomment %}
-
 <div id="canvas-container"></div>
 
 <table width="100%">
@@ -56,9 +51,5 @@
     {% endblock %}
 </div>
 <script async src="{% static "/stregsystem/gdpr.js" %}"></script>
-<div class="bat-container"></div>
-<div class="snow-container"></div>
-<div class="easter-container"></div>
-{% show_candle %}
 </body>
 </html>

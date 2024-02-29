@@ -226,7 +226,7 @@ class MemberAdmin(admin.ModelAdmin):
         (
             None,
             {
-                'fields': ('active', 'want_spam', 'balance', 'undo_count'),
+                'fields': ('active', 'want_spam', 'balance'),
                 'description': "Lad være med at rode med disse, med mindre du ved hvad du laver ...",
             },
         ),

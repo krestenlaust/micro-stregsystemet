@@ -174,7 +174,7 @@ class Member(models.Model):  # id automatisk...
         return (
             active_str(self.active)
             + " "
-            + self.username
+            + self.phone_number
             + ": "
             + self.full_name
             + " | "
