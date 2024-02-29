@@ -1333,7 +1333,8 @@ class MobilePaymentTests(TestCase):
         MobilePayment.submit_processed_mobile_payments(self.super_user)
 
         self.assertEqual(
-            Member.objects.get(phone_number__exact="jdoe").balance, self.members["jdoe"]['balance'] + mobile_payment.amount
+            Member.objects.get(phone_number__exact="jdoe").balance,
+            self.members["jdoe"]['balance'] + mobile_payment.amount,
         )
 
     def test_ignored_payment_balance(self):
@@ -1378,7 +1379,9 @@ class MobilePaymentTests(TestCase):
         # assert that each member who has an approved mobile payment has their balance updated by the amount given
         for approved_mobile_payment in MobilePayment.objects.filter(status__exact=MobilePayment.APPROVED):
             member = Member.objects.get(pk=approved_mobile_payment.member.pk)
-            self.assertEqual(member.balance, approved_mobile_payment.amount + self.members[member.phone_number]['balance'])
+            self.assertEqual(
+                member.balance, approved_mobile_payment.amount + self.members[member.phone_number]['balance']
+            )
 
     def test_member_balance_on_delete_approved_mobilepayment(self):
         # member balance unchanged before submission
@@ -1395,7 +1398,8 @@ class MobilePaymentTests(TestCase):
 
         # ensure new balance is mobilepayment amount
         self.assertEqual(
-            Member.objects.get(phone_number__exact="jdoe").balance, self.members["jdoe"]['balance'] + mobile_payment.amount
+            Member.objects.get(phone_number__exact="jdoe").balance,
+            self.members["jdoe"]['balance'] + mobile_payment.amount,
         )
 
         # delete payment
@@ -1515,9 +1519,7 @@ class MobilePaymentTests(TestCase):
 class AutoPaymentTests(TestCase):
     def setUp(self):
         self.autopayment_user = User.objects.create_superuser('autopayment', 'foo@bar.com', 'hunter2')
-        Member.objects.create(
-            phone_number='tester', full_name='Test Testsen', email='tables@nsa.gov', balance=178
-        )
+        Member.objects.create(phone_number='tester', full_name='Test Testsen', email='tables@nsa.gov', balance=178)
 
     def test_ignore_lt_50_20(self):
         comment = 'tester'
