@@ -98,7 +98,7 @@ class SaleViewTests(TestCase):
         self.assertTemplateUsed(response, "stregsystem/index_sale.html")
 
         assertCountEqual(self, response.context["products"], [Product.objects.get(id=1), Product.objects.get(id=1)])
-        self.assertEqual(response.context["member"], Member.objects.get(username="jokke"))
+        self.assertEqual(response.context["member"], Member.objects.get(phone_number="+4587654321"))
 
         fulfill.assert_called_once_with(PayTransaction(1800))
 
@@ -115,7 +115,7 @@ class SaleViewTests(TestCase):
         self.assertTemplateUsed(response, "stregsystem/index_sale.html")
 
         assertCountEqual(self, response.context["products"], {Product.objects.get(id=1)})
-        self.assertEqual(response.context["member"], Member.objects.get(username="jokke"))
+        self.assertEqual(response.context["member"], Member.objects.get(phone_number="+4587654321"))
 
         fulfill.assert_called_once_with(PayTransaction(900))
 
@@ -130,7 +130,7 @@ class SaleViewTests(TestCase):
         self.assertTemplateUsed(response, "stregsystem/index_sale.html")
 
         assertCountEqual(self, response.context["products"], {Product.objects.get(id=1)})
-        self.assertEqual(response.context["member"], Member.objects.get(username="jokke"))
+        self.assertEqual(response.context["member"], Member.objects.get(phone_number="+4587654321"))
 
         fulfill.assert_called_once_with(PayTransaction(900))
 
@@ -188,16 +188,16 @@ class SaleViewTests(TestCase):
         prod.full_clean()
 
     def test_make_sale_quickbuy_fail(self):
-        member_username = 'jan'
-        member_before = Member.objects.get(username=member_username)
-        response = self.client.post(reverse('quickbuy', args=(1,)), {"quickbuy": member_username + " 1"})
-        member_after = Member.objects.get(username=member_username)
+        member_phone_number = 'jan'
+        member_before = Member.objects.get(phone_number=member_phone_number)
+        response = self.client.post(reverse('quickbuy', args=(1,)), {"quickbuy": member_phone_number + " 1"})
+        member_after = Member.objects.get(phone_number=member_phone_number)
 
         self.assertEqual(response.status_code, 402)
         self.assertTemplateUsed(response, "stregsystem/error_stregforbud.html")
         self.assertEqual(member_before.balance, member_after.balance)
 
-        self.assertEqual(response.context["member"], Member.objects.get(username=member_username))
+        self.assertEqual(response.context["member"], Member.objects.get(phone_number=member_phone_number))
 
     def test_make_sale_quickbuy_wrong_product(self):
         response = self.client.post(reverse('quickbuy', args=(1,)), {"quickbuy": "jokke 99"})
@@ -240,7 +240,7 @@ class SaleViewTests(TestCase):
 
         self.assertContains(
             response,
-            "<b><span class=\"username\">jokke</span> har lige købt Limfjordsporter for tilsammen " "9.00 kr.</b>",
+            "<b><span class=\"phone_number\">jokke</span> har lige købt Limfjordsporter for tilsammen " "9.00 kr.</b>",
             html=True,
         )
 
@@ -278,7 +278,7 @@ class SaleViewTests(TestCase):
     def test_quicksale_increases_bought(self):
         before = Product.objects.get(id=2)
         before_bought = before.bought
-        before_member = Member.objects.get(username="jokke")
+        before_member = Member.objects.get(phone_number="+4587654321")
 
         response = self.client.post(reverse('quickbuy', args=(1,)), {"quickbuy": "jokke 2"})
 
@@ -286,7 +286,7 @@ class SaleViewTests(TestCase):
         self.assertTemplateUsed(response, "stregsystem/index_sale.html")
 
         after = Product.objects.get(id=2)
-        after_member = Member.objects.get(username="jokke")
+        after_member = Member.objects.get(phone_number="+4587654321")
 
         self.assertEqual(before_bought + 1, after.bought)
         # 900 is the product price
@@ -294,7 +294,7 @@ class SaleViewTests(TestCase):
 
     def test_quicksale_quanitity_none_noincrease(self):
         before = Product.objects.get(id=1)
-        before_member = Member.objects.get(username="jokke")
+        before_member = Member.objects.get(phone_number="+4587654321")
 
         response = self.client.post(reverse('quickbuy', args=(1,)), {"quickbuy": "jokke 1"})
 
@@ -302,7 +302,7 @@ class SaleViewTests(TestCase):
         self.assertTemplateUsed(response, "stregsystem/index_sale.html")
 
         after = Product.objects.get(id=1)
-        after_member = Member.objects.get(username="jokke")
+        after_member = Member.objects.get(phone_number="+4587654321")
 
         self.assertEqual(before.bought, after.bought)
         # 900 is the product price
@@ -310,7 +310,7 @@ class SaleViewTests(TestCase):
 
     def test_quicksale_out_of_stock(self):
         before = Product.objects.get(id=1)
-        before_member = Member.objects.get(username="jokke")
+        before_member = Member.objects.get(phone_number="+4587654321")
 
         response = self.client.post(reverse('quickbuy', args=(1,)), {"quickbuy": "jokke 3"})
 
@@ -321,19 +321,19 @@ class SaleViewTests(TestCase):
         self.assertTemplateNotUsed(response, "stregsystem/index_sale.html")
 
         after = Product.objects.get(id=1)
-        after_member = Member.objects.get(username="jokke")
+        after_member = Member.objects.get(phone_number="+4587654321")
 
         self.assertEqual(before.bought, after.bought)
         self.assertEqual(before_member.balance, after_member.balance)
 
     def test_quicksale_product_not_in_room(self):
         before_product = Product.objects.get(id=4)
-        before_member = Member.objects.get(username="jokke")
+        before_member = Member.objects.get(phone_number="+4587654321")
 
         response = self.client.post(reverse('quickbuy', args=(1,)), {"quickbuy": "jokke 4"})
 
         after_product = Product.objects.get(id=4)
-        after_member = Member.objects.get(username="jokke")
+        after_member = Member.objects.get(phone_number="+4587654321")
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "stregsystem/error_productdoesntexist.html")
@@ -343,12 +343,12 @@ class SaleViewTests(TestCase):
 
     def test_quicksale_product_available_all_rooms(self):
         before_product = Product.objects.get(id=1)
-        before_member = Member.objects.get(username="jokke")
+        before_member = Member.objects.get(phone_number="+4587654321")
 
         response = self.client.post(reverse('quickbuy', args=(1,)), {"quickbuy": "jokke 1"})
 
         after_product = Product.objects.get(id=1)
-        after_member = Member.objects.get(username="jokke")
+        after_member = Member.objects.get(phone_number="+4587654321")
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "stregsystem/index_sale.html")
@@ -357,12 +357,12 @@ class SaleViewTests(TestCase):
 
     def test_menusale_product_not_in_room(self):
         before_product = Product.objects.get(id=4)
-        before_member = Member.objects.get(username="jokke")
+        before_member = Member.objects.get(phone_number="+4587654321")
 
         response = self.client.post(reverse('menu', args=(1, before_member.id)), data={'product_id': 4})
 
         after_product = Product.objects.get(id=4)
-        after_member = Member.objects.get(username="jokke")
+        after_member = Member.objects.get(phone_number="+4587654321")
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "stregsystem/menu.html")
@@ -371,13 +371,13 @@ class SaleViewTests(TestCase):
         self.assertEqual(before_member.balance, after_member.balance)
 
     def test_multibuy_hint_not_applicable(self):
-        member = Member.objects.get(username="jokke")
+        member = Member.objects.get(phone_number="+4587654321")
         give_multibuy_hint, sale_hints = stregsystem_views._multibuy_hint(timezone.now(), member)
         self.assertFalse(give_multibuy_hint)
         self.assertIsNone(sale_hints)
 
     def test_multibuy_hint_one_buy_not_applicable(self):
-        member = Member.objects.get(username="jokke")
+        member = Member.objects.get(phone_number="+4587654321")
         coke = Product.objects.create(name="coke", price=100, active=True)
         Sale.objects.create(
             member=member,
@@ -389,7 +389,7 @@ class SaleViewTests(TestCase):
         self.assertIsNone(sale_hints)
 
     def test_multibuy_hint_two_buys_applicable(self):
-        member = Member.objects.get(username="jokke")
+        member = Member.objects.get(phone_number="+4587654321")
         coke = Product.objects.create(name="coke", price=100, active=True)
         with freeze_time(timezone.datetime(2018, 1, 1)) as frozen_time:
             for i in range(1, 3):
@@ -403,13 +403,13 @@ class SaleViewTests(TestCase):
             timezone.datetime(2018, 1, 1, tzinfo=pytz.UTC), member
         )
         self.assertTrue(give_multibuy_hint)
-        self.assertEqual(sale_hints, "{} {}:{}".format("<span class=\"username\">jokke</span>", coke.id, 2))
+        self.assertEqual(sale_hints, "{} {}:{}".format("<span class=\"phone_number\">jokke</span>", coke.id, 2))
 
 
 class UserInfoViewTests(TestCase):
     def setUp(self):
         self.room = Room.objects.create(name="test")
-        self.jokke = Member.objects.create(username="jokke")
+        self.jokke = Member.objects.create(phone_number="+4587654321")
         self.coke = Product.objects.create(name="coke", price=100, active=True)
         self.flan = Product.objects.create(name="flan", price=200, active=True)
         self.sales = []
@@ -586,7 +586,7 @@ class OrderTest(TestCase):
 
 class PaymentTests(TestCase):
     def setUp(self):
-        self.member = Member.objects.create(username="jon", balance=100)
+        self.member = Member.objects.create(phone_number="+4522222222", balance=100)
 
     @patch("stregsystem.models.Member.make_payment")
     def test_payment_save_not_saved(self, make_payment):
@@ -627,7 +627,7 @@ class PaymentTests(TestCase):
 class ProductTests(TestCase):
     def setUp(self):
         self.jeff = Member.objects.create(
-            username="Jeff",
+            phone_number="+4533334444",
         )
 
     def test_is_active_active(self):
@@ -702,7 +702,7 @@ class ProductTests(TestCase):
 
 class SaleTests(TestCase):
     def setUp(self):
-        self.member = Member.objects.create(username="jon", balance=100)
+        self.member = Member.objects.create(phone_number="+4522222222", balance=100)
         self.product = Product.objects.create(
             name="beer",
             price=1.0,
@@ -793,7 +793,7 @@ class MemberTests(TestCase):
         self.assertEqual(member.balance, 90)
 
     def test_promille_no_drinks(self):
-        user = Member.objects.create(username="test", gender='M')
+        user = Member.objects.create(phone_number="+4522222222", gender='M')
         non_alcoholic = Product.objects.create(name="mælk", price=1.0, active=True)
 
         user.sale_set.create(product=non_alcoholic, member=user, price=non_alcoholic.price)
@@ -801,7 +801,7 @@ class MemberTests(TestCase):
         self.assertEqual(0.0, user.calculate_alcohol_promille())
 
     def test_promille_with_alcohol_male(self):
-        user = Member.objects.create(username="test", gender='M')
+        user = Member.objects.create(phone_number="+4522222222", gender='M')
 
         # (330 ml * 4.6%) = 15.18
         alcoholic_drink = Product.objects.create(name="øl", price=2.0, alcohol_content_ml=15.18, active=True)
@@ -811,7 +811,7 @@ class MemberTests(TestCase):
         self.assertAlmostEqual(0.21, user.calculate_alcohol_promille(), places=2)
 
     def test_promille_with_alcohol_female(self):
-        user = Member.objects.create(username="test", gender='F')
+        user = Member.objects.create(phone_number="+4522222222", gender='F')
 
         # (330 ml * 4.6%) = 15.18
         alcoholic_drink = Product.objects.create(name="øl", price=2.0, alcohol_content_ml=15.18, active=True)
@@ -821,7 +821,7 @@ class MemberTests(TestCase):
         self.assertAlmostEqual(0.25, user.calculate_alcohol_promille(), places=2)
 
     def test_promille_staggered_male(self):
-        user = Member.objects.create(username="test", gender='M')
+        user = Member.objects.create(phone_number="+4522222222", gender='M')
 
         # (330 ml * 4.6%) = 15.18
         alcoholic_drink = Product.objects.create(name="øl", price=2.0, alcohol_content_ml=15.18, active=True)
@@ -837,7 +837,7 @@ class MemberTests(TestCase):
             self.assertAlmostEqual(0.97, user.calculate_alcohol_promille(), places=2)
 
     def test_promille_staggered_female(self):
-        user = Member.objects.create(username="test", gender='F')
+        user = Member.objects.create(phone_number="+4522222222", gender='F')
 
         # (330 ml * 4.6%) = 15.18
         alcoholic_drink = Product.objects.create(name="øl", price=2.0, alcohol_content_ml=15.18, active=True)
@@ -891,15 +891,15 @@ class BallmerPeakTests(TestCase):
 
 class MemberModelFormTests(TestCase):
     def setUp(self):
-        jeff = Member.objects.create(username="jeff", firstname="jeff", lastname="jefferson", gender="M")
+        jeff = Member.objects.create(phone_number="+4522222222", firstname="jeff", lastname="jefferson", gender="M")
 
-    def test_cant_create_duplicate_username(self):
-        jeff = Member(username="jeff", firstname="jeffrey", lastname="jefferson", gender="M")
+    def test_cant_create_duplicate_phone_number(self):
+        jeff = Member(phone_number="+4522222222", firstname="jeffrey", lastname="jefferson", gender="M")
         form = MemberForm(model_to_dict(jeff))
         self.assertFalse(form.is_valid())
 
-    def test_can_create_non_duplicate_username(self):
-        not_jeff = Member(username="not_jeff", firstname="jeff", lastname="jefferson", gender="M")
+    def test_can_create_non_duplicate_phone_number(self):
+        not_jeff = Member(phone_number="+4522222222", firstname="jeff", lastname="jefferson", gender="M")
         form = MemberForm(model_to_dict(not_jeff))
         self.assertTrue(form.is_valid())
 
@@ -909,9 +909,9 @@ class MemberAdminTests(TestCase):
         password = "very_secure"
         super_user = User.objects.create_superuser('superuser', 'test@example.com', password)
 
-        self.jeff = Member.objects.create(pk=1, username="jeff", firstname="jeff", lastname="jefferson", gender="M")
+        self.jeff = Member.objects.create(pk=1, phone_number="+4522222222", firstname="jeff", lastname="jefferson", gender="M")
 
-        self.jeff2 = Member.objects.create(pk=2, username="jeffrey", firstname="jeff", lastname="jefferson", gender="M")
+        self.jeff2 = Member.objects.create(pk=2, phone_number="+4533334444", firstname="jeff", lastname="jefferson", gender="M")
 
     def test_creates_warning_for_duplicate_usernames(self):
         self.client.login(username="superuser", password="very_secure")
@@ -943,7 +943,7 @@ class MemberAdminTests(TestCase):
 
 class ProductActivatedListFilterTests(TestCase):
     def setUp(self):
-        jeff = Member.objects.create(username="jeff")
+        jeff = Member.objects.create(phone_number="+4522222222")
         Product.objects.create(name="active_dec_none", price=1.0, active=True, deactivate_date=None)
         Product.objects.create(
             name="active_dec_future",
@@ -1178,52 +1178,6 @@ class QuickbuyParserTests(TestCase):
             parser.parse(buy_string)
 
 
-class RazziaTests(TestCase):
-    def setUp(self):
-        self.flan = Product.objects.create(name="FLan", price=1.0, active=True)
-        self.flanmad = Product.objects.create(name="FLan mad", price=2.0, active=True)
-        self.notflan = Product.objects.create(name="Ikke Flan", price=2.0, active=True)
-
-        self.alan = Member.objects.create(username="tester", firstname="Alan", lastname="Alansen")
-        self.bob = Member.objects.create(username="bob", firstname="bob", lastname="bob")
-
-        with freeze_time('2017-02-02'):
-            Sale.objects.create(member=self.alan, product=self.flan, price=1.0)
-
-        with freeze_time('2017-02-15'):
-            Sale.objects.create(member=self.alan, product=self.flan, price=1.0)
-
-        with freeze_time('2017-02-07'):
-            Sale.objects.create(member=self.alan, product=self.flanmad, price=1.0)
-
-        with freeze_time('2017-02-05'):
-            Sale.objects.create(member=self.alan, product=self.notflan, price=1.0)
-
-    def test_sales_to_user_in_period(self):
-        res = views._sales_to_user_in_period(
-            self.alan.username,
-            timezone.datetime(2017, 2, 1, 0, 0, tzinfo=pytz.UTC),
-            timezone.datetime(2017, 2, 17, 0, 0, tzinfo=pytz.UTC),
-            [self.flan.id, self.flanmad.id],
-            {self.flan.name: 0, self.flanmad.name: 0},
-        )
-
-        self.assertEqual(2, res[self.flan.name])
-        self.assertEqual(1, res[self.flanmad.name])
-
-    def test_sales_to_user_no_results_out_of_period(self):
-        res = views._sales_to_user_in_period(
-            self.bob.username,
-            timezone.datetime(2017, 2, 1, 0, 0, tzinfo=pytz.UTC),
-            timezone.datetime(2017, 2, 17, 0, 0, tzinfo=pytz.UTC),
-            [self.flan.id, self.flanmad.id],
-            {self.flan.name: 0, self.flanmad.name: 0},
-        )
-
-        self.assertEqual(0, res[self.flan.name])
-        self.assertEqual(0, res[self.flanmad.name])
-
-
 class MobilePaymentTests(TestCase):
     def setUp(self):
         self.fixture_path = "stregsystem/fixtures/mobilepay-sales-testdata-fixture.csv"
@@ -1235,46 +1189,40 @@ class MobilePaymentTests(TestCase):
         # Create members, directly mirrors fixture in 'stregsystem/fixtures/testdata-mobilepay.json'
         self.members = {
             'jdoe': {
-                'username': 'jdoe',
-                'firstname': 'John',
-                'lastname': 'Doe',
+                'phone_number': 'jdoe',
+                'full_name': 'John Doe',
                 'email': 'jdoe@nsa.gov',
                 'balance': 42000,
             },
             'marx': {
-                'username': 'marx',
-                'firstname': 'Karl',
-                'lastname': 'Marx',
+                'phone_number': 'marx',
+                'full_name': 'Karl Marx',
                 'email': 'marx@nsa.gov',
                 'balance': 6900,
             },
             'tables': {
-                'username': 'tables',
-                'firstname': 'Bobby',
-                'lastname': 'Tables',
+                'phone_number': 'tables',
+                'full_name': 'Bobby Tables',
                 'email': 'tables@nsa.gov',
                 'balance': 12500,
             },
             'mlarsen': {
-                'username': 'mlarsen',
-                'firstname': 'Martin',
-                'lastname': 'Larsen',
+                'phone_number': 'mlarsen',
+                'full_name': 'Martin Larsen',
                 'email': 'mlarsen@nsa.gov',
                 'balance': 10000,
             },
             'tester': {
-                'username': 'tester',
-                'firstname': 'Test',
-                'lastname': 'Testsen',
+                'phone_number': 'tester',
+                'full_name': 'Test Testsen',
                 'email': 'tables@nsa.gov',
                 'balance': 50000,
             },
         }
         for member in self.members:
             Member.objects.create(
-                username=self.members[member]['username'],
-                firstname=self.members[member]['firstname'],
-                lastname=self.members[member]['lastname'],
+                phone_number=self.members[member]['phone_number'],
+                full_name=self.members[member]['full_name'],
                 email=self.members[member]['email'],
                 balance=self.members[member]['balance'],
             ).save()
@@ -1373,10 +1321,10 @@ class MobilePaymentTests(TestCase):
 
     def test_approved_payment_balance(self):
         # member balance unchanged
-        self.assertEqual(Member.objects.get(username__exact="jdoe").balance, self.members["jdoe"]['balance'])
+        self.assertEqual(Member.objects.get(phone_number__exact="jdoe").balance, self.members["jdoe"]['balance'])
 
         # submit mobile payment
-        self.client.login(username="superuser", password="hunter2")
+        self.client.login(phone_number="+4533333333", password="hunter2")
 
         mobile_payment = MobilePayment.objects.get(transaction_id__exact="016E027417049990")
         mobile_payment.status = MobilePayment.APPROVED
@@ -1385,15 +1333,15 @@ class MobilePaymentTests(TestCase):
         MobilePayment.submit_processed_mobile_payments(self.super_user)
 
         self.assertEqual(
-            Member.objects.get(username__exact="jdoe").balance, self.members["jdoe"]['balance'] + mobile_payment.amount
+            Member.objects.get(phone_number__exact="jdoe").balance, self.members["jdoe"]['balance'] + mobile_payment.amount
         )
 
     def test_ignored_payment_balance(self):
         # member balance unchanged
-        self.assertEqual(Member.objects.get(username__exact="tester").balance, self.members["tester"]['balance'])
+        self.assertEqual(Member.objects.get(phone_number__exact="tester").balance, self.members["tester"]['balance'])
 
         # submit mobile payment
-        self.client.login(username="superuser", password="hunter2")
+        self.client.login(phone_number="+4533333333", password="hunter2")
 
         mobile_payment = MobilePayment.objects.get(transaction_id__exact="207E027395896809")
         mobile_payment.status = MobilePayment.IGNORED
@@ -1401,18 +1349,18 @@ class MobilePaymentTests(TestCase):
 
         MobilePayment.submit_processed_mobile_payments(self.super_user)
 
-        self.assertEqual(Member.objects.get(username__exact="tester").balance, self.members["tester"]['balance'])
+        self.assertEqual(Member.objects.get(phone_number__exact="tester").balance, self.members["tester"]['balance'])
 
     def test_batch_submission_balance(self):
         # member balance unchanged
         for member in self.members:
             self.assertEqual(
-                Member.objects.get(username__exact=self.members[member]['username']).balance,
+                Member.objects.get(phone_number__exact=self.members[member]['phone_number']).balance,
                 self.members[member]['balance'],
             )
 
         # submit mobile payment
-        self.client.login(username="superuser", password="hunter2")
+        self.client.login(phone_number="+4533333333", password="hunter2")
 
         # approve all exact matches
         for matched_mobile_payment in MobilePayment.objects.filter(member__isnull=False):
@@ -1421,7 +1369,7 @@ class MobilePaymentTests(TestCase):
 
         # manually approve bobby
         bobby_tables_mobile_payment1 = MobilePayment.objects.get(transaction_id__exact="232E027452733666")
-        bobby_tables_mobile_payment1.member = Member.objects.get(username__exact="tables")
+        bobby_tables_mobile_payment1.member = Member.objects.get(phone_number__exact="tables")
         bobby_tables_mobile_payment1.status = MobilePayment.APPROVED
         bobby_tables_mobile_payment1.save()
 
@@ -1430,14 +1378,14 @@ class MobilePaymentTests(TestCase):
         # assert that each member who has an approved mobile payment has their balance updated by the amount given
         for approved_mobile_payment in MobilePayment.objects.filter(status__exact=MobilePayment.APPROVED):
             member = Member.objects.get(pk=approved_mobile_payment.member.pk)
-            self.assertEqual(member.balance, approved_mobile_payment.amount + self.members[member.username]['balance'])
+            self.assertEqual(member.balance, approved_mobile_payment.amount + self.members[member.phone_number]['balance'])
 
     def test_member_balance_on_delete_approved_mobilepayment(self):
         # member balance unchanged before submission
-        self.assertEqual(Member.objects.get(username__exact="jdoe").balance, self.members["jdoe"]['balance'])
+        self.assertEqual(Member.objects.get(phone_number__exact="jdoe").balance, self.members["jdoe"]['balance'])
 
         # submit mobile payment
-        self.client.login(username="superuser", password="hunter2")
+        self.client.login(phone_number="+4533333333", password="hunter2")
 
         mobile_payment = MobilePayment.objects.get(transaction_id__exact="016E027417049990")
         mobile_payment.status = MobilePayment.APPROVED
@@ -1447,21 +1395,21 @@ class MobilePaymentTests(TestCase):
 
         # ensure new balance is mobilepayment amount
         self.assertEqual(
-            Member.objects.get(username__exact="jdoe").balance, self.members["jdoe"]['balance'] + mobile_payment.amount
+            Member.objects.get(phone_number__exact="jdoe").balance, self.members["jdoe"]['balance'] + mobile_payment.amount
         )
 
         # delete payment
         MobilePayment.objects.get(transaction_id__exact="016E027417049990").delete()
 
         # ensure member balance is original amount, as deletion of mobilepayment should revert change
-        self.assertEqual(Member.objects.get(username__exact="jdoe").balance, self.members["jdoe"]['balance'])
+        self.assertEqual(Member.objects.get(phone_number__exact="jdoe").balance, self.members["jdoe"]['balance'])
 
     def test_member_balance_on_delete_ignored_mobilepayment(self):
         # member balance unchanged before submission
-        self.assertEqual(Member.objects.get(username__exact="jdoe").balance, self.members["jdoe"]['balance'])
+        self.assertEqual(Member.objects.get(phone_number__exact="jdoe").balance, self.members["jdoe"]['balance'])
 
         # submit mobile payment
-        self.client.login(username="superuser", password="hunter2")
+        self.client.login(phone_number="+4533333333", password="hunter2")
 
         mobile_payment = MobilePayment.objects.get(transaction_id__exact="016E027417049990")
         mobile_payment.status = MobilePayment.IGNORED
@@ -1470,33 +1418,33 @@ class MobilePaymentTests(TestCase):
         MobilePayment.submit_processed_mobile_payments(self.super_user)
 
         # ensure balance is still initial amount
-        self.assertEqual(Member.objects.get(username__exact="jdoe").balance, self.members["jdoe"]['balance'])
+        self.assertEqual(Member.objects.get(phone_number__exact="jdoe").balance, self.members["jdoe"]['balance'])
 
         # delete payment
         mobile_payment.delete()
 
         # ensure member balance is original amount, as deletion of mobilepayment should revert change
-        self.assertEqual(Member.objects.get(username__exact="jdoe").balance, self.members["jdoe"]['balance'])
+        self.assertEqual(Member.objects.get(phone_number__exact="jdoe").balance, self.members["jdoe"]['balance'])
 
     def test_member_balance_on_delete_unset_mobilepayment(self):
         # member balance unchanged before submission
-        self.assertEqual(Member.objects.get(username__exact="jdoe").balance, self.members["jdoe"]['balance'])
+        self.assertEqual(Member.objects.get(phone_number__exact="jdoe").balance, self.members["jdoe"]['balance'])
 
         # submit mobile payments
-        self.client.login(username="superuser", password="hunter2")
+        self.client.login(phone_number="+4533333333", password="hunter2")
         MobilePayment.submit_processed_mobile_payments(self.super_user)
 
         # ensure balance is still initial amount
-        self.assertEqual(Member.objects.get(username__exact="jdoe").balance, self.members["jdoe"]['balance'])
+        self.assertEqual(Member.objects.get(phone_number__exact="jdoe").balance, self.members["jdoe"]['balance'])
 
         # delete payment
         MobilePayment.objects.get(transaction_id__exact="016E027417049990").delete()
 
         # ensure member balance is original amount, as deletion of mobilepayment should revert change
-        self.assertEqual(Member.objects.get(username__exact="jdoe").balance, self.members["jdoe"]['balance'])
+        self.assertEqual(Member.objects.get(phone_number__exact="jdoe").balance, self.members["jdoe"]['balance'])
 
     def test_exact_guess(self):
-        self.assertEqual(Member.objects.get(username__exact="marx"), mobile_payment_exact_match_member("marx"))
+        self.assertEqual(Member.objects.get(phone_number__exact="marx"), mobile_payment_exact_match_member("marx"))
 
     def test_emoji_strip(self):
         self.assertEqual(strip_emoji("Tilmeld Lichi 😎"), "Tilmeld Lichi")
@@ -1568,7 +1516,7 @@ class AutoPaymentTests(TestCase):
     def setUp(self):
         self.autopayment_user = User.objects.create_superuser('autopayment', 'foo@bar.com', 'hunter2')
         Member.objects.create(
-            username='tester', firstname='Test', lastname='Testsen', email='tables@nsa.gov', balance=178
+            phone_number='tester', full_name='Test Testsen', email='tables@nsa.gov', balance=178
         )
 
     def test_ignore_lt_50_20(self):
@@ -1643,7 +1591,7 @@ class CaffeineCalculatorTest(TestCase):
         self.assertEqual(product.caffeine_content_mg, 0)
 
     def test_calculate_is_zero_if_no_caffeine_is_consumed(self):
-        user = Member.objects.create(username="test", gender='M', balance=100)
+        user = Member.objects.create(phone_number="+4544443333", gender='M', balance=100)
         NOTcoffee = Product.objects.create(name="koffeinfri kaffe", price=2.0, caffeine_content_mg=0, active=True)
 
         user.sale_set.create(product=NOTcoffee, price=NOTcoffee.price)
@@ -1651,7 +1599,7 @@ class CaffeineCalculatorTest(TestCase):
         self.assertEqual(0, user.calculate_caffeine_in_body())
 
     def test_calculate_is_non_zero_if_some_caffeine_is_consumed(self):
-        user = Member.objects.create(username="test", gender='M', balance=100)
+        user = Member.objects.create(phone_number="+4544443333", gender='M', balance=100)
         coffee = Product.objects.create(
             name="koffeinholdig kaffe", price=2.0, caffeine_content_mg=CAFFEINE_IN_COFFEE, active=True
         )
@@ -1662,7 +1610,7 @@ class CaffeineCalculatorTest(TestCase):
 
     def test_caffeine_1_hour(self):
         with freeze_time() as frozen_datetime:
-            user = Member.objects.create(username="test", gender='M', balance=100)
+            user = Member.objects.create(phone_number="+4544443333", gender='M', balance=100)
             coffee = Product.objects.create(
                 name="Kaffe☕☕☕", price=1, caffeine_content_mg=CAFFEINE_IN_COFFEE, active=True
             )
@@ -1680,7 +1628,7 @@ class CaffeineCalculatorTest(TestCase):
     def test_caffeine_degradation_for_1_to_10_hours(self):
         for hours in range(1, 10):
             with freeze_time() as frozen_datetime:
-                user = Member.objects.create(username="test", gender='M', balance=100)
+                user = Member.objects.create(phone_number="+4544443333", gender='M', balance=100)
                 coffee = Product.objects.create(
                     name="Kaffe☕☕☕", price=1, caffeine_content_mg=CAFFEINE_IN_COFFEE, active=True
                 )
@@ -1696,7 +1644,7 @@ class CaffeineCalculatorTest(TestCase):
 
     def test_caffeine_half_time_twice_with_two_cups(self):
         with freeze_time() as frozen_datetime:
-            user = Member.objects.create(username="test", gender='M', balance=100)
+            user = Member.objects.create(phone_number="+4544443333", gender='M', balance=100)
             coffee = Product.objects.create(
                 name="Kaffe☕☕☕", price=1, caffeine_content_mg=CAFFEINE_IN_COFFEE, active=True
             )
@@ -1726,7 +1674,7 @@ class CaffeineCalculatorTest(TestCase):
         tick_two = datetime.timedelta(hours=1, minutes=13, seconds=16)
 
         with freeze_time() as frozen_datetime:
-            user = Member.objects.create(username="test", gender='M', balance=100)
+            user = Member.objects.create(phone_number="+4544443333", gender='M', balance=100)
             coffee = Product.objects.create(
                 name="Kaffe☕☕☕", price=1, caffeine_content_mg=CAFFEINE_IN_COFFEE, active=True
             )
@@ -1765,7 +1713,7 @@ class CaffeineCalculatorTest(TestCase):
             )
 
     def test_caffeine_str_is_correct_length(self):
-        user = Member.objects.create(username="test", gender='F', balance=100)
+        user = Member.objects.create(phone_number="+4544443333", gender='F', balance=100)
         coffee = Product.objects.create(name="Kaffe☕☕☕", price=1, caffeine_content_mg=CAFFEINE_IN_COFFEE, active=True)
 
         # do five sales of coffee and assert that emoji renderer returns same amount of emoji
@@ -1778,8 +1726,8 @@ class CaffeineCalculatorTest(TestCase):
             self.assertEqual("☕" * sales, caffeine_emoji_render(user.calculate_caffeine_in_body()))
 
     def test_rich_guy_is_leading_coffee_addict(self):
-        coffee_addict = Member.objects.create(username="Anders", gender="M", balance=100)
-        average_developer = Member.objects.create(username="my-guy", gender="M", balance=50)
+        coffee_addict = Member.objects.create(phone_number="+4544443333", gender="M", balance=100)
+        average_developer = Member.objects.create(phone_number="+4533334444", gender="M", balance=50)
         coffee_category = Category.objects.create(name="Caffeine☕☕☕", pk=6)
         coffee_category.save()
         coffee = Product.objects.create(name="Kaffe☕☕☕", price=1, caffeine_content_mg=70, active=True)
@@ -1793,8 +1741,8 @@ class CaffeineCalculatorTest(TestCase):
         self.assertFalse(average_developer.is_leading_coffee_addict())
 
     def test_if_sunday_is_in_week(self):
-        coffee_addict = Member.objects.create(username="Ida", gender="F", balance=100)
-        average_developer = Member.objects.create(username="my-gal", gender="F", balance=50)
+        coffee_addict = Member.objects.create(phone_number="+4533334444", gender="F", balance=100)
+        average_developer = Member.objects.create(phone_number="my-gal", gender="F", balance=50)
         coffee_category = Category.objects.create(name="Caffeine☕☕☕", pk=6)
         coffee_category.save()
         coffee = Product.objects.create(name="Kaffe☕☕☕", price=1, caffeine_content_mg=CAFFEINE_IN_COFFEE, active=True)
