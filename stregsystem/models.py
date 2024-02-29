@@ -192,7 +192,7 @@ class Member(models.Model):  # id automatisk...
         """
         Should only be called by the Payment and MobilePayment class.
 
-        >>> jokke = Member.objects.create(username="jokke", firstname="Joakim", lastname="Byg", email="treo@cs.aau.dk", year=2007)
+        >>> jokke = Member.objects.create(phone_number="jokke", full_name="Joakim Byg", email="treo@cs.aau.dk", year=2007)
         >>> jokke.balance
         0
         >>> jokke.make_payment(100)

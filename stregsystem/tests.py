@@ -891,15 +891,15 @@ class BallmerPeakTests(TestCase):
 
 class MemberModelFormTests(TestCase):
     def setUp(self):
-        jeff = Member.objects.create(phone_number="+4522222222", firstname="jeff", lastname="jefferson", gender="M")
+        jeff = Member.objects.create(phone_number="+4522222222", full_name="jeff jefferson", gender="M")
 
     def test_cant_create_duplicate_phone_number(self):
-        jeff = Member(phone_number="+4522222222", firstname="jeffrey", lastname="jefferson", gender="M")
+        jeff = Member(phone_number="+4522222222", full_name="jeff jefferson", gender="M")
         form = MemberForm(model_to_dict(jeff))
         self.assertFalse(form.is_valid())
 
     def test_can_create_non_duplicate_phone_number(self):
-        not_jeff = Member(phone_number="+4522222222", firstname="jeff", lastname="jefferson", gender="M")
+        not_jeff = Member(phone_number="+4522222222", full_name="jeff jefferson", gender="M")
         form = MemberForm(model_to_dict(not_jeff))
         self.assertTrue(form.is_valid())
 
@@ -909,9 +909,9 @@ class MemberAdminTests(TestCase):
         password = "very_secure"
         super_user = User.objects.create_superuser('superuser', 'test@example.com', password)
 
-        self.jeff = Member.objects.create(pk=1, phone_number="+4522222222", firstname="jeff", lastname="jefferson", gender="M")
+        self.jeff = Member.objects.create(pk=1, phone_number="+4522222222", full_name="jeff jefferson", gender="M")
 
-        self.jeff2 = Member.objects.create(pk=2, phone_number="+4533334444", firstname="jeff", lastname="jefferson", gender="M")
+        self.jeff2 = Member.objects.create(pk=2, phone_number="+4533334444", full_name="jeff jefferson", gender="M")
 
     def test_creates_warning_for_duplicate_usernames(self):
         self.client.login(username="superuser", password="very_secure")
@@ -925,7 +925,7 @@ class MemberAdminTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(2, len(messages))
         self.assertEqual(str(messages[0]), "Det brugernavn var allerede optaget")
-        self.assertEqual("jeff", Member.objects.filter(pk=2).get().username)
+        self.assertEqual("+4522222222", Member.objects.filter(pk=2).get().phone_number)
 
     def test_no_warning_unique_usernames(self):
         self.client.login(username="superuser", password="very_secure")
@@ -938,7 +938,7 @@ class MemberAdminTests(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(1, len(messages))
-        self.assertEqual("mr_jefferson", Member.objects.filter(pk=2).get().username)
+        self.assertEqual("mr_jefferson", Member.objects.filter(pk=2).get().phone_number)
 
 
 class ProductActivatedListFilterTests(TestCase):
