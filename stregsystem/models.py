@@ -11,7 +11,6 @@ from django.db.models import Count
 from django.utils import timezone
 
 from stregsystem.caffeine import Intake, CAFFEINE_TIME_INTERVAL, current_caffeine_in_body_compound_interest
-from stregsystem.deprecated import deprecated
 from stregsystem.mail import send_payment_mail
 from stregsystem.templatetags.stregsystem_extras import money
 from stregsystem.utils import (
@@ -502,10 +501,6 @@ class Product(models.Model):  # id automatisk...
     alcohol_content_ml = models.FloatField(default=0.0, null=True)
     caffeine_content_mg = models.IntegerField(default=0)
 
-    @deprecated
-    def __unicode__(self):
-        return self.__str__()
-
     def __str__(self):
         return active_str(self.active) + " " + self.name + " (" + money(self.price) + ")"
 
@@ -559,10 +554,6 @@ class OldPrice(models.Model):  # gamle priser, skal huskes; til regnskab/statist
     price = models.IntegerField()  # penge, oere...
     changed_on = models.DateTimeField(auto_now_add=True)
 
-    @deprecated
-    def __unicode__(self):
-        return self.__str__()
-
     def __str__(self):
         return self.product.name + ": " + money(self.price) + " (" + str(self.changed_on) + ")"
 
@@ -587,10 +578,6 @@ class Sale(models.Model):
     price_display.short_description = "Price"
     # XXX - django bug - kan ikke vaelge mellem desc og asc i admin, som ved normalt felt
     price_display.admin_order_field = 'price'
-
-    @deprecated
-    def __unicode__(self):
-        return self.__str__()
 
     def __str__(self):
         return (
