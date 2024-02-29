@@ -16,7 +16,6 @@ from django.utils.dateparse import parse_datetime
 from freezegun import freeze_time
 
 import stregsystem.parser as parser
-from stregreport import views
 from stregsystem import admin
 from stregsystem import views as stregsystem_views
 from stregsystem.admin import CategoryAdmin, ProductAdmin, MemberForm
