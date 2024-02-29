@@ -593,7 +593,9 @@ class Sale(models.Model):
         return self.__str__()
 
     def __str__(self):
-        return self.member.phone_number + " " + self.product.name + " (" + money(self.price) + ") " + str(self.timestamp)
+        return (
+            self.member.phone_number + " " + self.product.name + " (" + money(self.price) + ") " + str(self.timestamp)
+        )
 
     def save(self, *args, **kwargs):
         if self.id:
