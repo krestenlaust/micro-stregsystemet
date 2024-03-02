@@ -1,4 +1,4 @@
-Micro-Stregsystemet [![Django CI Actions Status](https://github.com/f-klubben/stregsystemet/workflows/Django%20CI/badge.svg)](https://github.com/f-klubben/stregsystemet/actions)  [![codecov](https://codecov.io/gh/f-klubben/stregsystemet/branch/next/graph/badge.svg)](https://codecov.io/gh/f-klubben/stregsystemet) 
+Micro-Stregsystemet [![Django CI Actions Status](https://github.com/krestenlaust/micro-stregsystemet/workflows/Django%20CI/badge.svg)](https://github.com/krestenlaust/micro-stregsystemet/actions) 
 ========
 
 Micro-Stregsystemet is a bare-bones stregsystem, where all the fuzz, fun and charm has been cut away. The end goal is to turn the system towards a cashier as opposed customers themselves. This gives more freedom for the system in generel, since there is only authorized users.
