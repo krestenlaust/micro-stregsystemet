@@ -570,6 +570,15 @@ def dump_named_items(request):
     return JsonResponse(items_dict, json_dumps_params={'ensure_ascii': False})
 
 
+def member_search(request):
+    query = request.GET.get('q', '')
+    results = Member.objects.filter(
+        Q(full_name__icontains=query) | Q(phone_number__icontains=query)
+    )
+    data = [{'id': result.id, 'full_name': result.full_name, 'phone_number': result.phone_number} for result in results]
+    return JsonResponse(data, safe=False)
+
+
 @csrf_exempt
 def api_sale(request):
     if request.method != "POST":
