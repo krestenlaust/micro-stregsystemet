@@ -1,3 +1,6 @@
+from django.urls import include, re_path
+
+from . import views
 from django.shortcuts import redirect
 from django.urls import re_path
 from django.contrib import admin
@@ -32,6 +35,7 @@ urlpatterns = [
     re_path(r'^(?P<room_name>[\w-]+)/user/(?P<member_id>\d+)/$', views.menu_userinfo, name="userinfo"),
     re_path(r'^(?P<room_name>[\w-]+)/user/(?P<member_id>\d+)/pay$', views.menu_userpay, name="userpay"),
     re_path(r'^(?P<room_name>[\w-]+)/user/(?P<member_id>\d+)/rank$', views.menu_userrank, name="userrank"),
+    re_path(r'^(?P<room_id>\d+)/send_csv_mail/(?P<member_id>\d+)/$', views.send_userdata, name="send_userdata"),
     re_path(r'^api/member/payment/qr$', views.qr_payment, name="payment_qr"),
     re_path(r'^api/member/active$', views.check_user_active, name="active_member"),
     re_path(r'^api/member/sales$', views.get_user_sales, name="get_user_sales"),
