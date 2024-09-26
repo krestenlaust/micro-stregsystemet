@@ -1,0 +1,24 @@
+<input type="text" id="search-input">
+
+<ul id="search-results"></ul>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#search-input').on('input', function() {
+            let query = $(this).val();
+            $.ajax({
+                url: '/api/member_search/',
+                data: {
+                    'q': query
+                },
+                success: function(data) {
+                    $('#search-results').empty();
+                    data.forEach(function(item) {
+                        $('#search-results').append(`<li>${item.full_name} / ${item.phone_number}</li>`);
+                    });
+                }
+            });
+        });
+    });
+</script>
